@@ -25,6 +25,8 @@ add_subdirectory(lib_webrtc)
 add_subdirectory(lib_webview)
 add_subdirectory(codegen)
 
+add_subdirectory(lib_secgram)
+
 get_filename_component(src_loc SourceFiles REALPATH)
 get_filename_component(res_loc Resources REALPATH)
 
@@ -1231,15 +1233,6 @@ PRIVATE
     settings.cpp
     settings.h
     stdafx.h
-
-    secgram/ws.hpp
-    secgram/json.hpp
-    secgram/SecgramCipher.hpp
-    secgram/SecgramConfigServer.hpp
-    secgram/SecgramConfigServer.cpp
-    secgram/SecgramCore.hpp
-    secgram/SecgramCore.cpp
-    secgram/SecgramData.hpp
 )
 
 if (NOT build_winstore)
