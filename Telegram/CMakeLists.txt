@@ -57,7 +57,7 @@ add_subdirectory(lib_secgram)
 
 target_link_libraries(Telegram
 PRIVATE
-    desktop-app::lib_secgram
+    desktop-app::lib_secgram 
 
     tdesktop::lib_tgcalls_legacy
     tdesktop::lib_tgcalls

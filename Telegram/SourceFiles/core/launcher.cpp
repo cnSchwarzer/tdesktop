@@ -318,7 +318,8 @@ int Launcher::exec() {
     QString text = QInputDialog::getText(nullptr, "Input Password",
                                          "Password", QLineEdit::Normal,
                                          QDir::home().dirName(), &ok);
-     
+    std::string pwd = text.toStdString();
+    
 	if (cLaunchMode() == LaunchModeFixPrevious) {
 		return psFixPrevious();
 	} else if (cLaunchMode() == LaunchModeCleanup) {

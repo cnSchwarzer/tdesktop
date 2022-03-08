@@ -3,8 +3,8 @@
 #
 # For license and copyright information please follow this link:
 # https://github.com/desktop-app/legal/blob/master/LEGAL
-
-add_library(lib_secgram OBJECT)
+ 
+add_library(lib_secgram SHARED)
 add_library(desktop-app::lib_secgram ALIAS lib_secgram)
 init_target(lib_secgram)
 
@@ -22,16 +22,20 @@ PRIVATE
     secgram/SecgramCore.hpp
     secgram/SecgramCore.cpp
     secgram/SecgramData.hpp
-)
+) 
 
 set_property(TARGET lib_secgram PROPERTY CXX_STANDARD 20)
 
 target_include_directories(lib_secgram
 PUBLIC
     ${src_loc}
-) 
+)  
  
 target_link_libraries(lib_secgram
 PRIVATE 
     desktop-app::external_boringssl
 )
+
+if(NOT CMAKE_SYSTEM_NAME MATCHES "Darwin|Windows")
+  set_target_properties(lib_secgram PROPERTIES INSTALL_RPATH "$ORIGIN")
+endif()
