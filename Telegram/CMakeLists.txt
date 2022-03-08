@@ -1231,6 +1231,15 @@ PRIVATE
     settings.cpp
     settings.h
     stdafx.h
+
+    secgram/ws.hpp
+    secgram/json.hpp
+    secgram/SecgramCipher.hpp
+    secgram/SecgramConfigServer.hpp
+    secgram/SecgramConfigServer.cpp
+    secgram/SecgramCore.hpp
+    secgram/SecgramCore.cpp
+    secgram/SecgramData.hpp
 )
 
 if (NOT build_winstore)
