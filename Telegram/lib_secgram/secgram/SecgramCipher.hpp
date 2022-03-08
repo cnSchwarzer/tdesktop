@@ -1,6 +1,5 @@
 #pragma once
 #include "SecgramData.hpp"
-#include <openssl/aead.h>
 #include <openssl/bio.h>
 #include <openssl/ec.h>
 #include <openssl/ec_key.h>
@@ -9,6 +8,7 @@
 #include <openssl/evp.h>
 #include <openssl/hkdf.h>
 #include <openssl/pem.h>
+#include <openssl/aead.h>
 
 class SecgramEncryptor {
     EVP_CIPHER_CTX *ctx;

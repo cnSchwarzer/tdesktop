@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/options.h"
 
 #include <QtCore/QLoggingCategory>
+#include <QInputDialog>
 
 namespace Core {
 namespace {
@@ -313,6 +314,11 @@ void Launcher::init() {
 int Launcher::exec() {
 	init();
 
+    bool ok;
+    QString text = QInputDialog::getText(nullptr, "Input Password",
+                                         "Password", QLineEdit::Normal,
+                                         QDir::home().dirName(), &ok);
+     
 	if (cLaunchMode() == LaunchModeFixPrevious) {
 		return psFixPrevious();
 	} else if (cLaunchMode() == LaunchModeCleanup) {

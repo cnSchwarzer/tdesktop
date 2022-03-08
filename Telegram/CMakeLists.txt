@@ -25,8 +25,6 @@ add_subdirectory(lib_webrtc)
 add_subdirectory(lib_webview)
 add_subdirectory(codegen)
 
-add_subdirectory(lib_secgram)
-
 get_filename_component(src_loc SourceFiles REALPATH)
 get_filename_component(res_loc Resources REALPATH)
 
@@ -53,10 +51,14 @@ if (WIN32)
 endif()
 
 set_target_properties(Telegram PROPERTIES AUTOMOC ON)
-target_prepare_qrc(Telegram)
+target_prepare_qrc(Telegram) 
+
+add_subdirectory(lib_secgram)
 
 target_link_libraries(Telegram
 PRIVATE
+    desktop-app::lib_secgram
+
     tdesktop::lib_tgcalls_legacy
     tdesktop::lib_tgcalls
     tdesktop::lib_tgvoip
@@ -1232,7 +1234,7 @@ PRIVATE
     mainwindow.h
     settings.cpp
     settings.h
-    stdafx.h
+    stdafx.h 
 )
 
 if (NOT build_winstore)

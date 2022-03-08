@@ -14,6 +14,8 @@ nice_target_sources(lib_secgram ${src_loc}
 PRIVATE
     secgram/ws.hpp
     secgram/json.hpp
+    secgram/secgram.hpp
+    secgram/secgram.cpp
     secgram/SecgramCipher.hpp
     secgram/SecgramConfigServer.hpp
     secgram/SecgramConfigServer.cpp
@@ -22,7 +24,14 @@ PRIVATE
     secgram/SecgramData.hpp
 )
 
+set_property(TARGET lib_secgram PROPERTY CXX_STANDARD 20)
+
 target_include_directories(lib_secgram
 PUBLIC
     ${src_loc}
 ) 
+ 
+target_link_libraries(lib_secgram
+PRIVATE 
+    desktop-app::external_boringssl
+)

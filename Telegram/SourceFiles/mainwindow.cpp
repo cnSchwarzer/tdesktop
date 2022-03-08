@@ -58,6 +58,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QWindow>
 #include <QtCore/QCoreApplication>
 
+#include <secgram/secgram.hpp>
+
 namespace {
 
 // Code for testing languages is F7-F6-F7-F8
