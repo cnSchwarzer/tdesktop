@@ -19,8 +19,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/concurrent_timer.h"
 #include "base/options.h"
 
+#include <secgram/secgram.hpp>
+#include <filesystem>
+
 #include <QtCore/QLoggingCategory>
 #include <QInputDialog>
+#include <QMessageBox>
 
 namespace Core {
 namespace {
@@ -313,12 +317,6 @@ void Launcher::init() {
 
 int Launcher::exec() {
 	init();
-
-    bool ok;
-    QString text = QInputDialog::getText(nullptr, "Input Password",
-                                         "Password", QLineEdit::Normal,
-                                         QDir::home().dirName(), &ok);
-    std::string pwd = text.toStdString();
     
 	if (cLaunchMode() == LaunchModeFixPrevious) {
 		return psFixPrevious();
@@ -546,6 +544,39 @@ void Launcher::processArguments() {
 int Launcher::executeApplication() {
 	FilteredCommandLineArguments arguments(_argc, _argv);
 	Sandbox sandbox(this, arguments.count(), arguments.values());
+    
+    std::string path = cWorkingDir().toStdString() + "tdata";
+    std::string configPath = path + "/config.json";
+    if (QFile::exists(QString::fromStdString(configPath))) {
+        bool ok;
+        QString text = QInputDialog::getText(nullptr, "Input Password",
+                                             "Password", QLineEdit::Password,
+                                             "", &ok);
+        std::string pwd = text.toStdString();
+        Secgram::init(pwd, path);
+        auto me = Secgram::me();
+        if (!me->isConfigured()) {
+            QMessageBox msgBox;
+            msgBox.setText("Config error. Wrong password or corrupted data.");
+            msgBox.exec();
+            exit(9);
+        } else {
+            me->runServer();
+			me->setShowPopup([](std::string title, std::string text) {
+                QMessageBox msgBox;
+                msgBox.setText((title + "\n" + text).c_str());
+                msgBox.exec();
+			});
+        }
+    } else {
+        Secgram::init("", path);
+        Secgram::me()->runServer();
+        QMessageBox msgBox;
+        msgBox.setText("Config not found. You can now connect to configuration server.");
+        msgBox.exec();
+        exit(9);
+    }
+    
 	Ui::MainQueueProcessor processor;
 	base::ConcurrentTimerEnvironment environment;
 	return sandbox.start();

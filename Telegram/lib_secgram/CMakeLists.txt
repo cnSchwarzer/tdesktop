@@ -26,6 +26,10 @@ PRIVATE
 
 set_property(TARGET lib_secgram PROPERTY CXX_STANDARD 20)
 
+set_target_properties(lib_secgram PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
 target_include_directories(lib_secgram
 PUBLIC
     ${src_loc}
@@ -34,6 +38,7 @@ PUBLIC
 target_link_libraries(lib_secgram
 PRIVATE 
     desktop-app::external_boringssl
+    desktop-app::external_qt
 )
 
 if(NOT CMAKE_SYSTEM_NAME MATCHES "Darwin|Windows")

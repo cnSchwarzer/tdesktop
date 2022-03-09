@@ -1343,6 +1343,7 @@ elseif (APPLE)
         PRE_LINK
             COMMAND mkdir -p $<TARGET_FILE_DIR:Telegram>/../Frameworks
             COMMAND cp $<TARGET_FILE:Updater> $<TARGET_FILE_DIR:Telegram>/../Frameworks/
+            COMMAND cp $<TARGET_FILE:lib_secgram> $<TARGET_FILE_DIR:Telegram>/../Frameworks/
         )
         if (NOT DESKTOP_APP_DISABLE_CRASH_REPORTS)
             if (DESKTOP_APP_MAC_ARCH STREQUAL "x86_64" OR DESKTOP_APP_MAC_ARCH STREQUAL "arm64")

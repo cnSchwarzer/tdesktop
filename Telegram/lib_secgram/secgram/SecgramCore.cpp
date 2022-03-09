@@ -19,6 +19,7 @@ using njson = nlohmann::json;
 SecgramCore::SecgramCore(std::string password, std::string root) {
     dirRoot = root;
     this->password = password;
+    fprintf(stderr, "Root %s\n", root.c_str());
 
     if (!password.empty()) {
         auto configBytes = read_all_bytes(dirRoot + "/config.json");
