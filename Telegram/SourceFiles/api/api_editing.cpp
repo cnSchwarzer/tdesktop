@@ -20,6 +20,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "mtproto/mtproto_response.h"
 #include "boxes/abstract_box.h" // Ui::show().
 
+#include <secgram/secgram.hpp>
+
 namespace Api {
 namespace {
 
@@ -47,6 +49,8 @@ mtpRequestId EditMessage(
 	const auto api = &session->api();
 
 	const auto text = textWithEntities.text;
+	auto encrypted = Secgram::me()->encryptTextMessage(text, session->userId().bare, item->history()->peer->id.value);
+
 	const auto sentEntities = EntitiesToMTP(
 		session,
 		textWithEntities.entities,
@@ -82,7 +86,7 @@ mtpRequestId EditMessage(
 		MTP_flags(flags),
 		item->history()->peer->input,
 		MTP_int(id),
-		MTP_string(text),
+		MTP_string(encrypted),
 		inputMedia.value_or(MTPInputMedia()),
 		MTPReplyMarkup(),
 		sentEntities,

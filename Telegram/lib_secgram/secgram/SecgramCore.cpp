@@ -611,7 +611,7 @@ std::string SecgramCore::decryptTextMessage(uint64_t localPeerId, uint64_t remot
             buf param = buf(decrypted.begin() + 8 + size, decrypted.end());
             ret = text;
 
-            if (localPeerId == currentPeerId && !param.empty()) {
+            if (localPeerId == currentPeerId && !param.empty() && local->privateSignKey != nullptr) {
                 if (text == ".sec") {
                     fprintf(stderr, "Secgram 2 receive new temp session\n");
                     int pubSize = *(int *)param.data();

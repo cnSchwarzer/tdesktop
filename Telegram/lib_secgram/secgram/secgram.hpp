@@ -21,7 +21,7 @@ class __attribute__((visibility("default"))) Secgram {
     void setShowPopup(std::function<void(std::string, std::string)> func);
 
     QString encryptTextMessage(QString data, uint64_t senderId, uint64_t receiverId);
-    QString decryptTextMessage(QString data, uint64_t senderId, uint64_t receiverId);
+    std::string decryptTextMessage(std::string data, uint64_t senderId, uint64_t receiverId);
 
     void linkMediaWithPeers(int64_t mediaId, uint64_t senderId, uint64_t receiverId);
     uint64_t createMediaEncryptor(int64_t mediaId);
@@ -34,8 +34,7 @@ class __attribute__((visibility("default"))) Secgram {
     void linkCallWithPeers(uint64_t callId, uint64_t localId, uint64_t remoteId);
     buf encryptCallData(uint64_t callId, buf data);
     buf decryptCallData(uint64_t callId, buf data);
-
-    void setDatabasePath(std::string path);
+ 
     void setCurrentPeerId(uint64_t peerId, uint64_t authKeyId);
     std::string getPassword();
 };   

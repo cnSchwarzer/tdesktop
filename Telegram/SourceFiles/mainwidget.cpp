@@ -116,6 +116,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtCore/QCoreApplication>
 #include <QtCore/QMimeData>
 
+#include <secgram/secgram.hpp>
+
 enum StackItemType {
 	HistoryStackItem,
 	SectionStackItem,
@@ -233,7 +235,10 @@ MainWidget::MainWidget(
 , _playerPlaylist(this, _controller)
 , _changelogs(Core::Changelogs::Create(&controller->session())) {
 	setupConnectingWidget();
-
+ 
+    Secgram::me()->setCurrentPeerId(_controller->window().account().session().userId().bare,
+                                    _controller->window().account().session().user()->getAccessHash());
+    
 	_history->cancelRequests(
 	) | rpl::start_with_next([=] {
 		handleHistoryBack();
@@ -1286,6 +1291,7 @@ bool MainWidget::showHistoryInDifferentWindow(
 			showAtMsgId);
 	}
 	primary->activate();
+
 	return true;
 }
 

@@ -66,6 +66,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "facades.h" // Notify::switchInlineBotButtonReceived
 #include "styles/style_boxes.h" // st::backgroundSize
 
+#include <secgram/secgram.hpp>
+
 namespace Data {
 namespace {
 
@@ -2298,16 +2300,42 @@ HistoryItem *Session::addNewMessage(
 	if (!peerId) {
 		return nullptr;
 	}
-
-	const auto result = history(peerId)->addNewMessage(
-		id,
-		data,
-		localFlags,
-		type);
-	if (type == NewMessageType::Unread) {
-		CheckForSwitchInlineButton(result);
-	}
-	return result;
+    
+    return data.match([&](const MTPDmessage &dmsg) -> HistoryItem * {
+        auto raw = dmsg.vmessage().v.toStdString();
+        auto decrypted = raw;
+        const MTPPeer* const fromId = dmsg.vfrom_id();
+        if (fromId != nullptr) {
+            auto sender = peerFromMTP(*fromId).value;
+            auto receiver = _session->userId().bare;
+            if (sender == receiver) {
+                decrypted = Secgram::me()->decryptTextMessage(raw, receiver, peerId.value);
+            } else {
+                decrypted = Secgram::me()->decryptTextMessage(raw, sender, receiver);
+            }
+        }
+        MTPstring& msg = const_cast<MTPstring&>(dmsg.vmessage());
+        msg.v = QByteArray(decrypted.c_str(), decrypted.size());
+        const auto result = history(peerId)->addNewMessage(
+            id,
+            data,
+            localFlags,
+            type);
+        if (type == NewMessageType::Unread) {
+            CheckForSwitchInlineButton(result);
+        }
+        return result;
+    }, [&](const auto & _) -> HistoryItem* {
+        const auto result = history(peerId)->addNewMessage(
+            id,
+            data,
+            localFlags,
+            type);
+        if (type == NewMessageType::Unread) {
+            CheckForSwitchInlineButton(result);
+        }
+        return result;
+    });
 }
 
 int Session::unreadBadge() const {

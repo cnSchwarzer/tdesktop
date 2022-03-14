@@ -50,6 +50,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "apiwrap.h"
 #include "ui/text/format_values.h" // Ui::FormatPhone
 
+#include <secgram/secgram.hpp>
+
 namespace Api {
 namespace {
 
@@ -1088,7 +1090,7 @@ void Updates::applyUpdatesNoPtsCheck(const MTPUpdates &updates) {
 	case mtpc_updateShortMessage: {
 		const auto &d = updates.c_updateShortMessage();
 		const auto flags = mtpCastFlags(d.vflags().v)
-			| MTPDmessage::Flag::f_from_id;
+			| MTPDmessage::Flag::f_from_id; 
 		_session->data().addNewMessage(
 			MTP_message(
 				MTP_flags(flags),

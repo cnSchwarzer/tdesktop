@@ -167,6 +167,10 @@ public:
 	}
 	void setCommonChatsCount(int count);
 
+    uint64 getAccessHash() {
+        return _accessHash;
+    }
+    
 private:
 	auto unavailableReasons() const
 		-> const std::vector<Data::UnavailableReason> & override;
@@ -180,6 +184,7 @@ private:
 	int _commonChatsCount = 0;
 
 	uint64 _accessHash = 0;
+
 	static constexpr auto kInaccessibleAccessHashOld
 		= 0xFFFFFFFFFFFFFFFFULL;
 

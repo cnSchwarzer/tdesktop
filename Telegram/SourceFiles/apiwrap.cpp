@@ -89,6 +89,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "storage/storage_account.h"
 #include "facades.h"
 
+#include <secgram/secgram.hpp>
+
 namespace {
 
 // Save draft to the cloud with 1 sec extra delay.
@@ -3418,8 +3420,10 @@ void ApiWrap::sendMessage(MessageToSend &&message) {
 
 		_session->data().registerMessageRandomId(randomId, newId);
 		_session->data().registerMessageSentData(randomId, peer->id, sending.text);
-
-		MTPstring msgText(MTP_string(sending.text));
+ 
+        auto encrypted = Secgram::me()->encryptTextMessage(sending.text, _session->userId().bare, peer->id.value);
+        
+		MTPstring msgText(MTP_string(encrypted));
 		auto flags = NewMessageFlags(peer);
 		auto sendFlags = MTPmessages_SendMessage::Flags(0);
 		if (action.replyTo) {
@@ -3780,12 +3784,13 @@ void ApiWrap::sendMediaWithRandomId(
 	histories.sendRequest(history, requestType, [=](Fn<void()> finish) {
 		const auto peer = history->peer;
 		const auto itemId = item->fullId();
+        auto captionEncrypted = Secgram::me()->encryptTextMessage(caption.text, _session->userId().bare, peer->id.value);
 		history->sendRequestId = request(MTPmessages_SendMedia(
 			MTP_flags(flags),
 			peer->input,
 			MTP_int(replyTo),
 			media,
-			MTP_string(caption.text),
+			MTP_string(captionEncrypted),
 			MTP_long(randomId),
 			MTPReplyMarkup(),
 			sentEntities,

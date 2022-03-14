@@ -111,7 +111,7 @@ PeerId PeerFromMessage(const MTPmessage &message) {
 		return peerFromMTP(data.vpeer_id());
 	});
 }
-
+  
 MTPDmessage::Flags FlagsFromMessage(const MTPmessage &message) {
 	return message.match([](const MTPDmessageEmpty &) {
 		return MTPDmessage::Flags(0);
