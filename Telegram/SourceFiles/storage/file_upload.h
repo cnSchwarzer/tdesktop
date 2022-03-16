@@ -132,6 +132,7 @@ private:
 	FullMsgId uploadingId;
 	FullMsgId _pausedId;
 	std::map<FullMsgId, File> queue;
+    std::map<FullMsgId, uint64_t> encryptorIds;
 	base::Timer _nextTimer, _stopSessionsTimer;
 
 	rpl::event_stream<UploadedMedia> _photoReady;
@@ -144,8 +145,7 @@ private:
 	rpl::event_stream<FullMsgId> _documentFailed;
 	rpl::event_stream<FullMsgId> _secureFailed;
 
-	rpl::lifetime _lifetime;
-
+	rpl::lifetime _lifetime; 
 };
 
 } // namespace Storage

@@ -177,6 +177,7 @@ PRIVATE
     desktop-app::external_ffmpeg
     desktop-app::external_openssl
     desktop-app::external_rnnoise
+    desktop-app::lib_secgram
 )
 
 target_compile_definitions(lib_tgcalls
@@ -263,5 +264,5 @@ target_link_libraries(lib_tgcalls_legacy
 PRIVATE
     tdesktop::lib_tgcalls
     tdesktop::lib_tgvoip
-    desktop-app::external_openssl
+    desktop-app::external_openssl 
 )

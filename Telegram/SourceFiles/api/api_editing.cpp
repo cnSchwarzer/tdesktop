@@ -49,7 +49,7 @@ mtpRequestId EditMessage(
 	const auto api = &session->api();
 
 	const auto text = textWithEntities.text;
-	auto encrypted = Secgram::me()->encryptTextMessage(text, session->userId().bare, item->history()->peer->id.value);
+	auto encrypted = QString(Secgram::me()->encryptTextMessage(text.toStdString(), session->userId().bare, item->history()->peer->id.value).c_str());
 
 	const auto sentEntities = EntitiesToMTP(
 		session,

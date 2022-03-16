@@ -79,7 +79,7 @@ class SecgramCore {
     void setConfig(buf config);
 
     std::string encryptTextMessage(uint64_t localPeerId, uint64_t remotePeerId, std::string content);
-    std::string decryptTextMessage(uint64_t localPeerId, uint64_t remotePeerId, std::string content); 
+    std::string decryptTextMessage(std::string content); 
 
     void linkMediaWithPeers(uint64_t mediaId, uint64_t senderId, uint64_t receiverId);
     uint64_t createMediaEncryptor(uint64_t mediaId);

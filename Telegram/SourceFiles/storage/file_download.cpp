@@ -22,6 +22,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "apiwrap.h"
 #include "core/crash_reports.h"
 #include "base/bytes.h"
+#include <secgram/secgram.hpp>
 
 namespace {
 
@@ -99,7 +100,8 @@ FileLoader::FileLoader(
 	LoadToCacheSetting toCache,
 	LoadFromCloudSetting fromCloud,
 	bool autoLoading,
-	uint8 cacheTag)
+	uint8 cacheTag,
+    uint64 mediaId)
 : _session(session)
 , _autoLoading(autoLoading)
 , _cacheTag(cacheTag)
@@ -112,6 +114,8 @@ FileLoader::FileLoader(
 , _locationType(locationType) {
 	Expects(_loadSize <= _fullSize);
 	Expects(!_filename.isEmpty() || (_fullSize <= Storage::kMaxFileInMemory));
+    
+    _mediaId = mediaId;
 }
 
 FileLoader::~FileLoader() {
@@ -126,7 +130,7 @@ void FileLoader::finishWithBytes(const QByteArray &data) {
 	_data = data;
 	_localStatus = LocalStatus::Loaded;
 	if (!_filename.isEmpty() && _toCache == LoadToCacheAsWell) {
-		if (!_fileIsOpen) _fileIsOpen = _file.open(QIODevice::WriteOnly);
+		if (!_fileIsOpen) _fileIsOpen = _file.open(QIODevice::ReadWrite);
 		if (!_fileIsOpen) {
 			cancel(true);
 			return;
@@ -254,7 +258,7 @@ bool FileLoader::checkForOpen() {
 		|| _fileIsOpen) {
 		return true;
 	}
-	_fileIsOpen = _file.open(QIODevice::WriteOnly);
+	_fileIsOpen = _file.open(QIODevice::ReadWrite);
 	if (_fileIsOpen) {
 		return true;
 	}
@@ -430,7 +434,7 @@ bool FileLoader::finalizeResult() {
 
 	if (!_filename.isEmpty() && (_toCache == LoadToCacheAsWell)) {
 		if (!_fileIsOpen) {
-			_fileIsOpen = _file.open(QIODevice::WriteOnly);
+			_fileIsOpen = _file.open(QIODevice::ReadWrite);
 		}
 		_file.seek(0);
 		if (!_fileIsOpen || _file.write(_data) != qint64(_data.size())) {
@@ -441,6 +445,18 @@ bool FileLoader::finalizeResult() {
 
 	_finished = true;
 	if (_fileIsOpen) {
+        auto ptr = 0;
+        auto decryptorId = Secgram::me()->createMediaDecryptor(_mediaId);
+        while (ptr < _fullSize) {
+            _file.seek(ptr);
+            auto batchSize = (_fullSize - ptr) < 8192 ? (_fullSize - ptr) : 8192;
+            auto encrypted = _file.read(batchSize);
+            auto decrypted = Secgram::me()->decryptMedia(decryptorId, std::vector<uint8_t>(encrypted.begin(), encrypted.end()));
+            _file.seek(ptr);
+            _file.write(QByteArray((char*)decrypted.data(), decrypted.size()));
+            ptr += batchSize;
+        }
+        	
 		_file.close();
 		_fileIsOpen = false;
 		Platform::File::PostprocessDownloaded(

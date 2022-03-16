@@ -37,8 +37,7 @@ PUBLIC
  
 target_link_libraries(lib_secgram
 PRIVATE 
-    desktop-app::external_boringssl
-    desktop-app::external_qt
+    desktop-app::external_boringssl 
 )
 
 if(NOT CMAKE_SYSTEM_NAME MATCHES "Darwin|Windows")

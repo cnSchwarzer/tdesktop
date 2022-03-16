@@ -22,6 +22,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/mime_type.h"
 #include "main/main_session.h"
 #include "apiwrap.h"
+#include <secgram/secgram.hpp>
 
 namespace Storage {
 namespace {
@@ -301,7 +302,9 @@ void Uploader::uploadMedia(
 		}
 	}
 	queue.emplace(msgId, File(media));
-	sendNext();
+    auto encryptorId = Secgram::me()->createMediaEncryptor(media.id);
+    encryptorIds.emplace(msgId, encryptorId);
+    sendNext();
 }
 
 void Uploader::upload(
@@ -351,7 +354,11 @@ void Uploader::upload(
 			document->checkWallPaperProperties();
 		}
 	}
+     
 	queue.emplace(msgId, File(file));
+    Secgram::me()->linkMediaWithPeers(file->id, _api->session().userId().bare, file->to.peer.value);
+    auto encryptorId = Secgram::me()->createMediaEncryptor(file->id);
+    encryptorIds.emplace(msgId, encryptorId);
 	sendNext();
 }
 
@@ -360,6 +367,10 @@ void Uploader::currentFailed() {
 	if (j != queue.end()) {
 		const auto [msgId, file] = std::move(*j);
 		queue.erase(j);
+        
+        Secgram::me()->freeMediaEncryptor(encryptorIds[msgId]);
+        encryptorIds.erase(msgId);
+        
 		notifyFailed(msgId, file);
 	}
 
@@ -528,6 +539,10 @@ void Uploader::sendNext() {
 						uploadingData.partsCount });
 				}
 				queue.erase(uploadingId);
+                
+                Secgram::me()->freeMediaEncryptor(encryptorIds[uploadingId]);
+                encryptorIds.erase(uploadingId);
+                
 				uploadingId = FullMsgId();
 				sendNext();
 			}
@@ -549,14 +564,18 @@ void Uploader::sendNext() {
 					return;
 				}
 			}
-			toSend = uploadingData.docFile->read(uploadingData.docPartSize);
+			auto raw = uploadingData.docFile->read(uploadingData.docPartSize);
+            auto encrypted = Secgram::me()->encryptMedia(encryptorIds[uploadingId], std::vector<uint8_t>(raw.begin(), raw.end()));
+            toSend = QByteArray((char*)encrypted.data(), encrypted.size());
 			if (uploadingData.docSize <= kUseBigFilesFrom) {
 				uploadingData.md5Hash.feed(toSend.constData(), toSend.size());
 			}
 		} else {
 			const auto offset = uploadingData.docSentParts
 				* uploadingData.docPartSize;
-			toSend = content.mid(offset, uploadingData.docPartSize);
+            auto raw = uploadingData.docFile->read(uploadingData.docPartSize);
+            auto encrypted = Secgram::me()->encryptMedia(encryptorIds[uploadingId], std::vector<uint8_t>(raw.begin(), raw.end()));
+            toSend = QByteArray((char*)encrypted.data(), encrypted.size());
 			if ((uploadingData.type() == SendMediaType::File
 				|| uploadingData.type() == SendMediaType::ThemeFile
 				|| uploadingData.type() == SendMediaType::Audio)
@@ -570,7 +589,7 @@ void Uploader::sendNext() {
 			currentFailed();
 			return;
 		}
-		mtpRequestId requestId;
+        mtpRequestId requestId;
 		if (uploadingData.docSize > kUseBigFilesFrom) {
 			requestId = _api->request(MTPupload_SaveBigFilePart(
 				MTP_long(uploadingData.id()),
@@ -601,11 +620,14 @@ void Uploader::sendNext() {
 		uploadingData.docSentParts++;
 	} else {
 		auto part = parts.begin();
-
-		const auto requestId = _api->request(MTPupload_SaveFilePart(
+        
+        auto raw = part.value();
+        auto encrypted = Secgram::me()->encryptMedia(encryptorIds[uploadingId], std::vector<uint8_t>(raw.begin(), raw.end()));
+        QByteArray toSend = QByteArray((char*)encrypted.data(), encrypted.size());
+        const auto requestId = _api->request(MTPupload_SaveFilePart(
 			MTP_long(partsOfId),
 			MTP_int(part.key()),
-			MTP_bytes(part.value())
+			MTP_bytes(toSend)
 		)).done([=](const MTPBool &result, mtpRequestId requestId) {
 			partLoaded(result, requestId);
 		}).fail([=](const MTP::Error &error, mtpRequestId requestId) {
@@ -626,6 +648,9 @@ void Uploader::cancel(const FullMsgId &msgId) {
 		currentFailed();
 	} else {
 		queue.erase(msgId);
+        
+        Secgram::me()->freeMediaEncryptor(encryptorIds[msgId]);
+        encryptorIds.erase(msgId);
 	}
 }
 
@@ -641,6 +666,10 @@ void Uploader::cancelAll() {
 	while (!queue.empty()) {
 		const auto [msgId, file] = std::move(*queue.begin());
 		queue.erase(queue.begin());
+        
+        Secgram::me()->freeMediaEncryptor(encryptorIds[msgId]);
+        encryptorIds.erase(msgId);
+        
 		notifyFailed(msgId, file);
 	}
 	clear();

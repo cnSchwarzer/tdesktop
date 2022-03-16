@@ -34,6 +34,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <tgcalls/VideoCaptureInterface.h>
 #include <tgcalls/StaticThreads.h>
 
+#include <secgram/secgram.hpp>
+
 namespace tgcalls {
 class InstanceImpl;
 class InstanceV2Impl;
@@ -521,6 +523,9 @@ bool Call::handleUpdate(const MTPPhoneCall &call) {
 		}
 
 		_id = data.vid().v;
+
+        Secgram::me()->linkCallWithPeers(_id, data.vparticipant_id().v, data.vadmin_id().v);
+
 		_accessHash = data.vaccess_hash().v;
 		const auto gaHashBytes = bytes::make_span(data.vg_a_hash().v);
 		if (gaHashBytes.size() != kSha256Size) {
@@ -546,7 +551,10 @@ bool Call::handleUpdate(const MTPPhoneCall &call) {
 		const auto &data = call.c_phoneCallWaiting();
 		if (data.vid().v != _id) {
 			return false;
-		}
+		} 
+
+        Secgram::me()->linkCallWithPeers(_id, data.vadmin_id().v, data.vparticipant_id().v);
+
 		if (_type == Type::Outgoing
 			&& _state.current() == State::Waiting
 			&& data.vreceive_date().value_or_empty() != 0) {
@@ -831,6 +839,7 @@ void Call::createAndStartController(const MTPDphoneCall &call) {
 		},
 		.createAudioDeviceModule = Webrtc::AudioDeviceModuleCreator(
 			settings.callAudioBackend()),
+		.callId = _id
 	};
 	if (Logs::DebugEnabled()) {
 		const auto callLogFolder = cWorkingDir() + qsl("DebugLogs");

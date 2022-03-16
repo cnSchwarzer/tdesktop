@@ -1036,7 +1036,11 @@ void HistoryInner::paintEvent(QPaintEvent *e) {
 					view,
 					selfromy - htop,
 					seltoy - htop);
-				view->draw(p, context);
+                if (view->media() != nullptr) {
+                    auto document = view->media()->getDocument();
+                    auto photo = view->media()->getPhoto();
+                }
+                view->draw(p, context);
 				processPainted(view, top, height);
 			}
 			top += height;

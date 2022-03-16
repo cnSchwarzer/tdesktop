@@ -37,8 +37,10 @@ mtpFileLoader::mtpFileLoader(
 	toCache,
 	fromCloud,
 	autoLoading,
-	cacheTag)
+	cacheTag,
+    location.objectId())
 , DownloadMtprotoTask(&session->downloader(), location, origin) {
+    
 }
 
 mtpFileLoader::mtpFileLoader(

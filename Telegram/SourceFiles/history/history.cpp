@@ -55,6 +55,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/unixtime.h"
 #include "base/qt/qt_common_adapters.h"
 #include "styles/style_dialogs.h"
+#include <secgram/secgram.hpp>
 
 namespace {
 
@@ -391,6 +392,7 @@ std::vector<not_null<HistoryItem*>> History::createItems(
 	const auto detachExistingItem = true;
 	for (auto i = data.cend(), e = data.cbegin(); i != e;) {
 		const auto &data = *--i;
+         
 		result.emplace_back(createItem(
 			IdFromMessage(data),
 			data,
@@ -420,7 +422,21 @@ not_null<HistoryItem*> History::addNewMessage(
 not_null<HistoryItem*> History::insertItem(
 		std::unique_ptr<HistoryItem> item) {
 	Expects(item != nullptr);
-
+    
+    auto original = item->originalText();
+    original.text = QString(Secgram::me()->decryptTextMessage(original.text.toStdString()).c_str());
+    item->setText(original);
+    
+    if (item->media() != nullptr && item->media()->document() != nullptr) {
+        auto fromId = item->from()->id.value;
+        auto peerId = item->history()->peer->id.value;
+        auto localId = session().userId().bare;
+        if (localId == fromId) {
+            Secgram::me()->linkMediaWithPeers(item->media()->document()->id, localId, peerId);
+        } else {
+            Secgram::me()->linkMediaWithPeers(item->media()->document()->id, peerId, localId);
+        }
+    }
 	const auto [i, ok] = _messages.insert(std::move(item));
 
 	const auto result = i->get();

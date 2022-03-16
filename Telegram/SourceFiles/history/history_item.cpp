@@ -50,9 +50,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_channel.h"
 #include "data/data_chat.h"
 #include "data/data_user.h"
+#include "data/data_types.h"
 #include "data/data_sponsored_messages.h"
 #include "styles/style_dialogs.h"
 #include "styles/style_chat.h"
+
+#include <secgram/secgram.hpp>
 
 namespace {
 

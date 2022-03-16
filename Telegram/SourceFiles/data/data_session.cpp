@@ -2302,20 +2302,6 @@ HistoryItem *Session::addNewMessage(
 	}
     
     return data.match([&](const MTPDmessage &dmsg) -> HistoryItem * {
-        auto raw = dmsg.vmessage().v.toStdString();
-        auto decrypted = raw;
-        const MTPPeer* const fromId = dmsg.vfrom_id();
-        if (fromId != nullptr) {
-            auto sender = peerFromMTP(*fromId).value;
-            auto receiver = _session->userId().bare;
-            if (sender == receiver) {
-                decrypted = Secgram::me()->decryptTextMessage(raw, receiver, peerId.value);
-            } else {
-                decrypted = Secgram::me()->decryptTextMessage(raw, sender, receiver);
-            }
-        }
-        MTPstring& msg = const_cast<MTPstring&>(dmsg.vmessage());
-        msg.v = QByteArray(decrypted.c_str(), decrypted.size());
         const auto result = history(peerId)->addNewMessage(
             id,
             data,

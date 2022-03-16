@@ -506,7 +506,8 @@ void Instance::handleCallUpdate(
 			&& _currentCall->id() == phoneCall.vid().v) {
 			// May be a repeated phoneCallRequested update from getDifference.
 			return;
-		}
+		} 
+
 		const auto &config = session->serverConfig();
 		if (inCall() || inGroupCall() || !user || user->isSelf()) {
 			const auto flags = phoneCall.is_video()

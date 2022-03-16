@@ -402,6 +402,7 @@ std::string SecgramCore::getBasicInfo() {
         char certStoreVersion[128];
         uint64_t peerId;
         uint64_t authKeyId;
+        char platform[8];
     };
 
     BasicInfo basic = {};
@@ -410,6 +411,7 @@ std::string SecgramCore::getBasicInfo() {
     memcpy(basic.certStoreVersion, certStoreVersion.c_str(), certStoreVersion.size());
     basic.peerId = currentPeerId;
     basic.authKeyId = currentAuthKeyId;
+    memcpy(basic.platform, "macOS", 5);
 
     std::string ret((char *)&basic, sizeof(BasicInfo));
     return ret;
@@ -564,6 +566,10 @@ std::string SecgramCore::encryptTextMessage(uint64_t localPeerId, uint64_t remot
     }
 
     buf encrypted = aes_gcm_encrypt(sess->key, sess->iv, str_to_buf(text));
+    buf senderTag = buf((uint8_t*)&localPeerId, (uint8_t*)&localPeerId + 8);
+    buf receiverTag = buf((uint8_t*)&remotePeerId, (uint8_t*)&remotePeerId + 8);
+    encrypted.insert(encrypted.begin(), receiverTag.begin(), receiverTag.end());
+    encrypted.insert(encrypted.begin(), senderTag.begin(), senderTag.end());
     buf typeTag = buf(&type, &type + 1);
     encrypted.insert(encrypted.begin(), typeTag.begin(), typeTag.end());
     auto bytes = base64_encode(encrypted);
@@ -571,20 +577,20 @@ std::string SecgramCore::encryptTextMessage(uint64_t localPeerId, uint64_t remot
     return buf_to_str(bytes);
 }
 
-std::string SecgramCore::decryptTextMessage(uint64_t localPeerId, uint64_t remotePeerId, std::string content) {
+std::string SecgramCore::decryptTextMessage(std::string content) {
     if (content.empty())
         return content;
 
-    auto local = users[localPeerId];
-    auto remote = users[remotePeerId];
     auto bytesAll = base64_decode(str_to_buf(content));
-    if (bytesAll.size() < 1)
+    if (bytesAll.size() < 17)
         return content;
 
     auto type = bytesAll[0];
     if (type != 0 && type != 0xff) {
         return content;
     }
+    auto localPeerId = *(uint64_t*)(bytesAll.data() + 9);
+    auto remotePeerId = *(uint64_t*)(bytesAll.data() + 1);
 
     std::shared_ptr<SecgramSession> sess = nullptr;
     if (type == 0) {
@@ -599,9 +605,12 @@ std::string SecgramCore::decryptTextMessage(uint64_t localPeerId, uint64_t remot
         return content;
     }
 
-    auto bytes = buf(bytesAll.begin() + 1, bytesAll.end());
+    auto local = users[localPeerId];
+    auto remote = users[remotePeerId];
+
+    auto bytes = buf(bytesAll.begin() + 17, bytesAll.end());
     buf decrypted = aes_gcm_decrypt(sess->key, sess->iv, bytes);
-    std::string ret = content;
+    std::string ret = content; 
 
     if (decrypted.size() > 8) {
         std::string tag = buf_to_str(buf(decrypted.data(), decrypted.data() + 4));

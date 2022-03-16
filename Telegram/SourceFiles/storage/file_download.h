@@ -63,7 +63,8 @@ public:
 		LoadToCacheSetting toCache,
 		LoadFromCloudSetting fromCloud,
 		bool autoLoading,
-		uint8 cacheTag);
+		uint8 cacheTag,
+        uint64 mediaId = 0);
 	virtual ~FileLoader();
 
 	[[nodiscard]] Main::Session &session() const;
@@ -180,7 +181,8 @@ protected:
 
 	rpl::lifetime _lifetime;
 	rpl::event_stream<rpl::empty_value, bool> _updates;
-
+    
+    uint64 _mediaId = 0; 
 };
 
 [[nodiscard]] std::unique_ptr<FileLoader> CreateFileLoader(

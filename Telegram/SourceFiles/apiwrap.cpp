@@ -3421,7 +3421,7 @@ void ApiWrap::sendMessage(MessageToSend &&message) {
 		_session->data().registerMessageRandomId(randomId, newId);
 		_session->data().registerMessageSentData(randomId, peer->id, sending.text);
  
-        auto encrypted = Secgram::me()->encryptTextMessage(sending.text, _session->userId().bare, peer->id.value);
+        auto encrypted = QString(Secgram::me()->encryptTextMessage(sending.text.toStdString(), _session->userId().bare, peer->id.value).c_str());
         
 		MTPstring msgText(MTP_string(encrypted));
 		auto flags = NewMessageFlags(peer);
@@ -3784,7 +3784,7 @@ void ApiWrap::sendMediaWithRandomId(
 	histories.sendRequest(history, requestType, [=](Fn<void()> finish) {
 		const auto peer = history->peer;
 		const auto itemId = item->fullId();
-        auto captionEncrypted = Secgram::me()->encryptTextMessage(caption.text, _session->userId().bare, peer->id.value);
+        auto captionEncrypted = QString(Secgram::me()->encryptTextMessage(caption.text.toStdString(), _session->userId().bare, peer->id.value).c_str());
 		history->sendRequestId = request(MTPmessages_SendMedia(
 			MTP_flags(flags),
 			peer->input,
