@@ -331,7 +331,9 @@ ListWidget::ListWidget(
 		itemRemoved(item);
 	}, lifetime());
 
-	subscribe(session().data().queryItemVisibility(), [this](const Data::Session::ItemVisibilityQuery &query) {
+	session().data().itemVisibilityQueries(
+	) | rpl::start_with_next([=](
+			const Data::Session::ItemVisibilityQuery &query) {
 		if (const auto view = viewForItem(query.item)) {
 			const auto top = itemTop(view);
 			if (top >= 0
@@ -340,7 +342,7 @@ ListWidget::ListWidget(
 				*query.isVisible = true;
 			}
 		}
-	});
+	}, lifetime());
 
 	using ChosenReaction = Reactions::Manager::Chosen;
 	_reactionsManager->chosen(
@@ -794,6 +796,7 @@ void ListWidget::visibleTopBottomUpdated(
 		scrollDateHideByTimer();
 	}
 	_controller->floatPlayerAreaUpdated();
+	session().data().itemVisibilitiesUpdated();
 	_applyUpdatedScrollState.call();
 }
 
@@ -1578,7 +1581,8 @@ void ListWidget::startItemRevealAnimations() {
 void ListWidget::startMessageSendingAnimation(
 		not_null<HistoryItem*> item) {
 	auto &sendingAnimation = controller()->sendingAnimation();
-	if (!sendingAnimation.hasLocalMessage(item->fullId().msg)) {
+	if (!sendingAnimation.hasLocalMessage(item->fullId().msg)
+		|| !sendingAnimation.checkExpectedType(item)) {
 		return;
 	}
 

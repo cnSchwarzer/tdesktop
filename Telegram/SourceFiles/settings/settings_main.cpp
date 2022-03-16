@@ -113,7 +113,6 @@ Cover::Cover(
 	setupChildGeometry();
 
 	_userpic->switchChangePhotoOverlay(_user->isSelf());
-
 	_userpic->uploadPhotoRequests(
 	) | rpl::start_with_next([=] {
 		_user->session().api().peerPhoto().upload(
@@ -301,9 +300,7 @@ void SetupSections(
 			}
 		};
 		slided->toggleOn(
-			rpl::single(
-				rpl::empty_value()
-			) | rpl::then(
+			rpl::single(rpl::empty) | rpl::then(
 				account->appConfig().refreshed()
 			) | rpl::map(
 				enabled

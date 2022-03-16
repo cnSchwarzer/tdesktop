@@ -178,6 +178,7 @@ private:
 	[[nodiscard]] QRect computeTitleRect() const;
 	void refreshTitle();
 	void refreshTitleGeometry();
+	void refreshTitleColors();
 	void setupRealCallViewers();
 	void subscribeToChanges(not_null<Data::GroupCall*> real);
 
@@ -203,6 +204,7 @@ private:
 	rpl::variable<bool> _fullScreenOrMaximized = false;
 
 #ifndef Q_OS_MAC
+	rpl::variable<int> _controlsTop = 0;
 	const std::unique_ptr<Ui::Platform::SeparateTitleControls> _controls;
 #endif // !Q_OS_MAC
 
@@ -212,6 +214,8 @@ private:
 
 	object_ptr<Ui::RpWidget> _titleBackground = { nullptr };
 	object_ptr<Ui::FlatLabel> _title = { nullptr };
+	object_ptr<Ui::FlatLabel> _titleSeparator = { nullptr };
+	object_ptr<Ui::FlatLabel> _viewers = { nullptr };
 	object_ptr<Ui::FlatLabel> _subtitle = { nullptr };
 	object_ptr<Ui::AbstractButton> _recordingMark = { nullptr };
 	object_ptr<Ui::IconButton> _menuToggle = { nullptr };

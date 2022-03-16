@@ -484,9 +484,7 @@ void MainWidget::floatPlayerEnumerateSections(Fn<void(
 }
 
 bool MainWidget::floatPlayerIsVisible(not_null<HistoryItem*> item) {
-	auto isVisible = false;
-	session().data().queryItemVisibility().notify({ item, &isVisible }, true);
-	return isVisible;
+	return session().data().queryItemVisibility(item);
 }
 
 void MainWidget::floatPlayerClosed(FullMsgId itemId) {
@@ -683,7 +681,7 @@ void MainWidget::hiderLayer(base::unique_qptr<Window::HistoryHider> hider) {
 
 	_hider->confirmed(
 	) | rpl::start_with_next([=] {
-		_dialogs->onCancelSearch();
+		_dialogs->cancelSearch();
 	}, _hider->lifetime());
 
 	if (isOneColumn()) {
