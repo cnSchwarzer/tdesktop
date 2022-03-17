@@ -1345,6 +1345,11 @@ elseif (APPLE)
             COMMAND cp $<TARGET_FILE:Updater> $<TARGET_FILE_DIR:Telegram>/../Frameworks/
             COMMAND cp $<TARGET_FILE:lib_secgram> $<TARGET_FILE_DIR:Telegram>/../Frameworks/
         )
+        add_custom_command(TARGET Telegram 
+        POST_BUILD
+            COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @executable_path/../Frameworks/ $<TARGET_FILE:Telegram>
+            COMMENT "Adding liblib_secgram.dylib lib rpath"
+        )
         if (NOT DESKTOP_APP_DISABLE_CRASH_REPORTS)
             if (DESKTOP_APP_MAC_ARCH STREQUAL "x86_64" OR DESKTOP_APP_MAC_ARCH STREQUAL "arm64")
                 set(crashpad_dir_part ".${DESKTOP_APP_MAC_ARCH}")
