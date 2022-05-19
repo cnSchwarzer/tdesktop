@@ -921,9 +921,13 @@ void Instance::Private::configLoadDone(const MTPConfig &result) {
 		Local::writeAutoupdatePrefix(qs(*prefix));
 	}
 
+    TimeId now = base::unixtime::now();
+    int32_t expires = data.vexpires().v;
 	_configExpiresAt = crl::now()
-		+ (data.vexpires().v - base::unixtime::now()) * crl::time(1000);
+		+ (expires - now) * crl::time(1000);
+#if !TDESKTOP_USE_PRIVATE_SERVER
 	requestConfigIfExpired();
+#endif
 }
 
 bool Instance::Private::configLoadFail(const Error &error) {

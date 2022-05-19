@@ -1274,6 +1274,10 @@ if (DESKTOP_APP_USE_PACKAGED)
     )
 endif()
 
+if (TDESKTOP_USE_PRIVATE_SERVER)
+    add_compile_definitions(TDESKTOP_USE_PRIVATE_SERVER=1)
+endif()
+
 nice_target_sources(Telegram ${res_loc}
 PRIVATE
     qrc/emoji_1.qrc
@@ -1347,8 +1351,8 @@ elseif (APPLE)
         )
         add_custom_command(TARGET Telegram 
         POST_BUILD
-            COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @executable_path/../Frameworks/ $<TARGET_FILE:Telegram>
             COMMENT "Adding liblib_secgram.dylib lib rpath"
+            COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @executable_path/../Frameworks/ $<TARGET_FILE:Telegram> >> /dev/null || echo 'Already added'
         )
         if (NOT DESKTOP_APP_DISABLE_CRASH_REPORTS)
             if (DESKTOP_APP_MAC_ARCH STREQUAL "x86_64" OR DESKTOP_APP_MAC_ARCH STREQUAL "arm64")
@@ -1410,7 +1414,13 @@ else()
     if (LINUX AND DESKTOP_APP_USE_PACKAGED)
         set(output_name "telegram-desktop")
     else()
-        set(output_name "Telegram")
+        if (TDESKTOP_USE_PRIVATE_SERVER)
+            set(output_name "Secpram")
+            set(bundle_identifier "tg.private$<$<CONFIG:Debug>:Debug>")
+        else()
+            set(output_name "Secgram")
+            set(bundle_identifier "tg.official$<$<CONFIG:Debug>:Debug>")
+        endif()
     endif()
 endif()
 

@@ -136,6 +136,7 @@ void ConfigLoader::setPhone(const QString &phone) {
 }
 
 void ConfigLoader::createSpecialLoader() {
+#if !TDESKTOP_USE_PRIVATE_SERVER
 	_triedSpecialEndpoints.clear();
 	_specialLoader = std::make_unique<SpecialConfigRequest>([=](
 			DcId dcId,
@@ -148,6 +149,7 @@ void ConfigLoader::createSpecialLoader() {
 			addSpecialEndpoint(dcId, ip, port, secret);
 		}
 	}, _instance->configValues().txtDomainString, _phone);
+#endif
 }
 
 void ConfigLoader::addSpecialEndpoint(

@@ -28,6 +28,35 @@ struct BuiltInDc {
 	int port;
 };
 
+#if TDESKTOP_USE_PRIVATE_SERVER
+const BuiltInDc kBuiltInDcs[] = {
+	{ 1, "tg.sch.ink" , 12345 }
+};  
+
+const BuiltInDc kBuiltInDcsTest[] = {
+	{ 1, "tg.sch.ink" , 12345 }
+};
+
+const char *kTestPublicRSAKeys[] = {"-----BEGIN RSA PUBLIC KEY-----\n"
+             "MIIBCgKCAQEA34nUCNRr4v84eEPzgZ+wW2i9tO5DzmTdrM+dQypyjgG4TiCG1rlX\n"
+             "ehJc0GATCVE6WFX+wfWxGIaYiVVvuWxchwcql89tvI3mPr+8BavuYqr+SM83SKgd\n"
+             "5v1wzkPqClrTmZlCRElwwu9gR88LwXu3ivH5oOOu2sKdMz107wclVjt32DsycBR6\n"
+             "tiPe1KXEzAIuenEsSy+vGr4C2RizaqynYcihvE8PW67SfbfUNyIW2pMSziWYfQaV\n"
+             "zKh9tctq2/9Hqe1A2aVlQPu3ogWUHe6xG+ZH1mDcAvy+VN9nypwJWRGW1SSSlWWe\n"
+             "dQwqTXm2jnZ3/PyNAaQidWGZy4hgSry1vwIDAQAB\n"
+             "-----END RSA PUBLIC KEY-----" };
+
+const char *kPublicRSAKeys[] = { "-----BEGIN RSA PUBLIC KEY-----\n"
+             "MIIBCgKCAQEA34nUCNRr4v84eEPzgZ+wW2i9tO5DzmTdrM+dQypyjgG4TiCG1rlX\n"
+             "ehJc0GATCVE6WFX+wfWxGIaYiVVvuWxchwcql89tvI3mPr+8BavuYqr+SM83SKgd\n"
+             "5v1wzkPqClrTmZlCRElwwu9gR88LwXu3ivH5oOOu2sKdMz107wclVjt32DsycBR6\n"
+             "tiPe1KXEzAIuenEsSy+vGr4C2RizaqynYcihvE8PW67SfbfUNyIW2pMSziWYfQaV\n"
+             "zKh9tctq2/9Hqe1A2aVlQPu3ogWUHe6xG+ZH1mDcAvy+VN9nypwJWRGW1SSSlWWe\n"
+             "dQwqTXm2jnZ3/PyNAaQidWGZy4hgSry1vwIDAQAB\n"
+             "-----END RSA PUBLIC KEY-----" };
+
+#else
+
 const BuiltInDc kBuiltInDcs[] = {
 	{ 1, "149.154.175.50" , 443 },
 	{ 2, "149.154.167.51" , 443 },
@@ -76,7 +105,7 @@ MIIBCgKCAQEA6LszBcC1LGzyr992NzE0ieY+BSaOW622Aa9Bd4ZHLl+TuFQ4lo4g\n\
 t6N/byY9Nw9p21Og3AoXSL2q/2IJ1WRUhebgAdGVMlV1fkuOQoEzR7EdpqtQD9Cs\n\
 5+bfo3Nhmcyvk5ftB0WkJ9z6bNZ7yxrP8wIDAQAB\n\
 -----END RSA PUBLIC KEY-----" };
-
+#endif
 } // namespace
 
 class DcOptions::WriteLocker {
@@ -181,6 +210,7 @@ void DcOptions::constructFromBuiltIn() {
 			).arg(entry.port));
 	}
 
+#if !TDESKTOP_USE_PRIVATE_SERVER
 	const auto listv6 = isTestMode()
 		? gsl::make_span(kBuiltInDcsIPv6Test)
 		: gsl::make_span(kBuiltInDcsIPv6).subspan(0);
@@ -193,6 +223,7 @@ void DcOptions::constructFromBuiltIn() {
 			).arg(entry.ip
 			).arg(entry.port));
 	}
+#endif
 }
 
 void DcOptions::processFromList(
@@ -686,9 +717,11 @@ auto DcOptions::lookup(
 			? Variants::IPv6
 			: Variants::IPv4;
 		result.data[address][Variants::Tcp].push_back(endpoint);
+#if !TDESKTOP_USE_PRIVATE_SERVER
 		if (!(flags & (Flag::f_tcpo_only | Flag::f_secret))) {
 			result.data[address][Variants::Http].push_back(endpoint);
 		}
+#endif
 	}
 	if (type == DcType::MediaCluster) {
 		FilterIfHasWithFlag(result, Flag::f_media_only);

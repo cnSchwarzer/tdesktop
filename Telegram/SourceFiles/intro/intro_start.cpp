@@ -23,8 +23,12 @@ StartWidget::StartWidget(
 	not_null<Main::Account*> account,
 	not_null<Data*> data)
 : Step(parent, account, data, true) {
-	setMouseTracking(true);
-	setTitleText(rpl::single(qsl("Telegram Desktop")));
+	setMouseTracking(true); 
+#if TDESKTOP_USE_PRIVATE_SERVER
+	setTitleText(rpl::single(qsl("Secpram"))); 
+#else
+	setTitleText(rpl::single(qsl("Secgram"))); 
+#endif
 	setDescriptionText(tr::lng_intro_about());
 	show();
 }

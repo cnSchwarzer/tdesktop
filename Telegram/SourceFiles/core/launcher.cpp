@@ -297,7 +297,11 @@ void Launcher::init() {
 	prepareSettings();
 	initQtMessageLogging();
 
-	QApplication::setApplicationName(qsl("TelegramDesktop"));
+#if TDESKTOP_USE_PRIVATE_SERVER
+	QApplication::setApplicationName(qsl("Secpram"));
+#else
+	QApplication::setApplicationName(qsl("Secgram"));
+#endif
 	QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
 	QApplication::setHighDpiScaleFactorRoundingPolicy(
 		Qt::HighDpiScaleFactorRoundingPolicy::Floor);

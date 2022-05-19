@@ -64,7 +64,11 @@ AboutBox::AboutBox(QWidget *parent)
 }
 
 void AboutBox::prepare() {
-	setTitle(rpl::single(qsl("Telegram Desktop")));
+#if TDESKTOP_USE_PRIVATE_SERVER
+	setTitle(rpl::single(qsl("Secpram")));
+#else
+	setTitle(rpl::single(qsl("Secgram")));
+#endif
 
 	addButton(tr::lng_close(), [this] { closeBox(); });
 

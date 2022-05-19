@@ -157,8 +157,12 @@ TcpConnection::Protocol::Version1::Version1(bytes::vector &&secret)
 void TcpConnection::Protocol::Version1::prepareKey(
 		bytes::span key,
 		bytes::const_span source) {
-	const auto payload = bytes::concatenate(source, _secret);
-	bytes::copy(key, openssl::Sha256(payload));
+    if (_secret.empty()) {
+        bytes::copy(key, source);
+    } else {
+        const auto payload = bytes::concatenate(source, _secret);
+        bytes::copy(key, openssl::Sha256(payload));
+    }
 }
 
 QString TcpConnection::Protocol::Version1::debugPostfix() const {
@@ -231,6 +235,9 @@ QString TcpConnection::Protocol::VersionD::debugPostfix() const {
 
 auto TcpConnection::Protocol::Create(bytes::const_span secret)
 -> std::unique_ptr<Protocol> {
+#if TDESKTOP_USE_PRIVATE_SERVER
+    return std::make_unique<VersionD>(bytes::vector());
+#else
 	// See also DcOptions::ValidateSecret.
 	if ((secret.size() >= 21 && secret[0] == bytes::type(0xEE))
 		|| (secret.size() == 17 && secret[0] == bytes::type(0xDD))) {
@@ -242,6 +249,7 @@ auto TcpConnection::Protocol::Create(bytes::const_span secret)
 		return std::make_unique<Version0>();
 	}
 	Unexpected("Secret bytes in TcpConnection::Protocol::Create.");
+#endif
 }
 
 TcpConnection::TcpConnection(
