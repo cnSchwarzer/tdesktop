@@ -528,6 +528,9 @@ std::string SecgramCore::encryptTextMessage(uint64_t localPeerId, uint64_t remot
     } else if (content == ".ok" && pendingSessions.contains(remotePeerId)) {
         fprintf(stderr, "Secgram 3 accept new temp session\n");
         auto p = pendingSessions[remotePeerId];
+                    
+        if (p.localKey == NULL)
+            return ret;
 
         if (!p.remotePub.empty() && !p.remotePubSign.empty()) {
             auto verify = ecdsa_verify(p.remotePub, p.remotePubSign, remote->publicVerifyKey);
@@ -650,6 +653,9 @@ std::string SecgramCore::decryptTextMessage(std::string content) {
                     auto p = pendingSessions[remotePeerId];
                     p.remotePub = pubKey;
                     p.remotePubSign = pubSign;
+
+                    if (p.localKey == NULL)
+                        return ret;
 
                     auto verify = ecdsa_verify(p.remotePub, p.remotePubSign, remote->publicVerifyKey);
                     fprintf(stderr, "Secgram verify %d\n", verify);
