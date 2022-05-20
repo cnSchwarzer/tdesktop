@@ -530,7 +530,7 @@ std::string SecgramCore::encryptTextMessage(uint64_t localPeerId, uint64_t remot
         auto p = pendingSessions[remotePeerId];
                     
         if (p.localKey == NULL)
-            return ret;
+            return content;
 
         if (!p.remotePub.empty() && !p.remotePubSign.empty()) {
             auto verify = ecdsa_verify(p.remotePub, p.remotePubSign, remote->publicVerifyKey);
