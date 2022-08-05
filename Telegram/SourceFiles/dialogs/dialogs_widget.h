@@ -15,6 +15,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/special_buttons.h"
 #include "mtproto/sender.h"
 #include "api/api_single_message_search.h"
+#include "cu/banner_widget.h"
 
 namespace MTP {
 class Error;
@@ -198,6 +199,9 @@ private:
 	std::unique_ptr<Ui::DownloadBar> _downloadBar;
 	std::unique_ptr<Window::ConnectionState> _connecting;
 
+    Cu::BannerWidget _banner;
+    object_ptr<Ui::RippleTextButton> _bannerClick = { nullptr };
+    
 	Ui::Animations::Simple _scrollToAnimation;
 	Ui::Animations::Simple _a_show;
 	Window::SlideDirection _showDirection = Window::SlideDirection();

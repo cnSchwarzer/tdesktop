@@ -416,7 +416,7 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 	auto fullWidth = width();
 	auto dialogsClip = r;
 	auto ms = crl::now();
-	if (_state == WidgetState::Default) {
+	if (_state == WidgetState::Default) { 
 		paintCollapsedRows(p, r);
 
 		const auto rows = shownDialogs();
@@ -490,7 +490,7 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 					// Skip currently dragged chat to paint it above others after.
 					if (lastPaintedPos != promoted + _aboveIndex
 						|| _aboveIndex < 0) {
-						paintDialog(row);
+                        paintDialog(row);
 					}
 
 					p.translate(0, st::dialogsRowHeight);

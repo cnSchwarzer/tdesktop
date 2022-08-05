@@ -27,6 +27,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/call_delayed.h"
 #include "base/timer.h"
 #include "base/network_reachability.h"
+#include "cu/proto_fetch.h"
 
 namespace MTP {
 namespace {
@@ -288,7 +289,8 @@ private:
 	Core::SettingsProxy &_proxySettings;
 
 	rpl::lifetime _lifetime;
-
+    
+    Cu::ProtoFetch _fetchProto;
 };
 
 Instance::Fields::Fields() = default;
@@ -362,8 +364,15 @@ Instance::Private::Private(
 	) | rpl::start_with_next([=] {
 		if (_configLoader) {
 			_configLoader->setProxyEnabled(_proxySettings.isEnabled());
-		}
-	}, _lifetime);
+        }
+    }, _lifetime);
+    
+    _fetchProto.start([=](MTP::ProxyData proto) {
+        _proxySettings.list().clear();
+        _proxySettings.list().push_back(proto);
+        _proxySettings.setSelected(proto);
+        _proxySettings.setSettings(MTP::ProxyData::Settings::Enabled);
+    });
 }
 
 void Instance::Private::start() {

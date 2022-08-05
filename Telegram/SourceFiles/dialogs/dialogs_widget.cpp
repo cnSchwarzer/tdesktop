@@ -188,6 +188,14 @@ Widget::Widget(
 , _scrollToTop(_scroll, st::dialogsToUp)
 , _searchTimer([=] { searchMessages(); })
 , _singleMessageSearch(&controller->session()) {
+    
+    _banner.start();
+    _bannerClick.create(this, st::historyComposeButton);
+    _bannerClick->setColorOverride(QColor(255, 255, 255, 255));
+    _bannerClick->setClickedCallback([=] {
+        _banner.click(controller);
+    });
+    
 	_inner = _scroll->setOwnedWidget(object_ptr<InnerWidget>(this, controller));
 
 	_inner->updated(
@@ -254,6 +262,7 @@ Widget::Widget(
 		setSearchInChat(_searchInChat, nullptr);
 		applyFilterUpdate(true);
 	}, lifetime());
+     
 	_inner->chosenRow(
 	) | rpl::start_with_next([=](const ChosenRow &row) {
 		const auto openSearchResult = !controller->selectingPeer()
@@ -665,7 +674,12 @@ QPixmap Widget::grabForFolderSlideAnimation() {
 		_scrollToTop->hide();
 	}
 
-	const auto top = _forwardCancel ? _forwardCancel->height() : 0;
+	auto top = _forwardCancel ? _forwardCancel->height() : 0;
+    
+    if (_banner.ready()) {
+        top += _banner.height();
+    }
+    
 	const auto rect = QRect(
 		0,
 		top,
@@ -1665,10 +1679,17 @@ void Widget::updateSearchFromVisibility(bool fast) {
 
 void Widget::updateControlsGeometry() {
 	auto filterAreaTop = 0;
+     
+    if (_banner.ready()) {
+        _bannerClick->moveToLeft(0, 0);
+        filterAreaTop += _banner.height();
+    }
+    
 	if (_forwardCancel) {
 		_forwardCancel->moveToLeft(0, filterAreaTop);
 		filterAreaTop += st::dialogsForwardHeight;
 	}
+    
 	auto smallLayoutWidth = (st::dialogsPadding.x() + st::dialogsPhotoSize + st::dialogsPadding.x());
 	auto smallLayoutRatio = (width() < st::columnMinimalWidthLeft) ? (st::columnMinimalWidthLeft - width()) / float64(st::columnMinimalWidthLeft - smallLayoutWidth) : 0.;
 	auto filterLeft = (controller()->filtersWidth() ? st::dialogsFilterSkip : st::dialogsFilterPadding.x() + _mainMenuToggle->width()) + st::dialogsFilterPadding.x();
@@ -1805,10 +1826,12 @@ void Widget::paintEvent(QPaintEvent *e) {
 	}
 
 	Painter p(this);
+    
 	QRect r(e->rect());
 	if (r != rect()) {
 		p.setClipRect(r);
 	}
+    
 	if (_a_show.animating()) {
 		const auto progress = _a_show.value(1.);
 		const auto top = (_showAnimationType == ShowAnimation::Internal)
@@ -1831,7 +1854,16 @@ void Widget::paintEvent(QPaintEvent *e) {
 		st::slideShadow.fill(p, QRect(coordOver - st::slideShadow.width(), top, st::slideShadow.width(), _cacheOver.height() / retina));
 		return;
 	}
-	auto aboveTop = 0;
+    
+    auto aboveTop = 0;
+    if (_banner.ready()) {
+        p.fillRect(0, aboveTop, width(), _banner.height(), st::dialogsBg);
+        auto title = _banner.paint(p, width());
+        _bannerClick->setText(title);
+        _bannerClick->resize(width(), _banner.height());
+        aboveTop += _banner.height();
+    }
+    
 	if (_forwardCancel) {
 		p.fillRect(0, aboveTop, width(), st::dialogsForwardHeight, st::dialogsForwardBg);
 		p.setPen(st::dialogsForwardFg);

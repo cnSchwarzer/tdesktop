@@ -84,7 +84,9 @@ MainWindow::MainWindow(not_null<Window::Controller*> controller)
 	resize(st::windowDefaultWidth, st::windowDefaultHeight);
 
 	setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
-
+    
+    QNetworkProxyFactory::setUseSystemConfiguration(true);
+    
 	using Window::Theme::BackgroundUpdate;
 	Window::Theme::Background()->updates(
 	) | rpl::start_with_next([=](const BackgroundUpdate &data) {
