@@ -170,6 +170,9 @@ CloudManager::CloudManager(Instance &langpack)
 	) | rpl::start_with_next([=](not_null<MTP::Instance*> instance) {
 		_api.emplace(instance);
 		resendRequests();
+        if (_langpack.id() != "zh-hans-raw") {
+            switchToLanguage("zh-hans-raw");
+        }
 	}, _lifetime);
 }
 

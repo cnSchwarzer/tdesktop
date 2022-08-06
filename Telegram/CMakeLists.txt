@@ -1482,12 +1482,12 @@ if (build_macstore)
         COMMAND rm -rf $<TARGET_FILE_DIR:Telegram>/../Frameworks/Breakpad.framework/Resources/Inspector
     )
 else()
-    set(bundle_identifier "com.tdesktop.Telegram$<$<CONFIG:Debug>:Debug>")
+    set(bundle_identifier "com.tdesktop.Hirochat$<$<CONFIG:Debug>:Debug>")
     set(bundle_entitlements "Telegram.entitlements")
     if (LINUX AND DESKTOP_APP_USE_PACKAGED)
         set(output_name "telegram-desktop")
     else()
-        set(output_name "Telegram")
+        set(output_name "Hirochat")
     endif()
 endif()
 
@@ -1520,13 +1520,13 @@ target_compile_definitions(Telegram
 PRIVATE
     TDESKTOP_API_ID=${TDESKTOP_API_ID}
     TDESKTOP_API_HASH=${TDESKTOP_API_HASH}
-    G_LOG_DOMAIN="Telegram"
+    G_LOG_DOMAIN="Hirochat"
 )
 
 if (APPLE
     OR "${CMAKE_GENERATOR}" STREQUAL "Ninja Multi-Config"
     OR NOT CMAKE_EXECUTABLE_SUFFIX STREQUAL ""
-    OR NOT "${output_name}" STREQUAL "Telegram")
+    OR NOT "${output_name}" STREQUAL "Hirochat")
     set(output_folder ${CMAKE_BINARY_DIR})
 else()
     set(output_folder ${CMAKE_BINARY_DIR}/bin)
