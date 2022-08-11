@@ -795,7 +795,7 @@ void MainWindow::updateUnreadCounter() {
 	}
 
 	const auto counter = Core::App().unreadBadge();
-	setTitle((counter > 0) ? qsl("Hirochat (%1)").arg(counter) : qsl("Hirochat"));
+	setTitle((counter > 0) ? qsl("小飞机 (%1)").arg(counter) : qsl("小飞机"));
 
 	Core::App().tray().updateIconCounters();
 	unreadCounterChangedHook();
