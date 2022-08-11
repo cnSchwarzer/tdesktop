@@ -292,7 +292,7 @@ void MainWindow::createGlobalMenu() {
 		}
 	};
 
-	auto main = psMainMenu.addMenu(qsl("Hirochat"));
+	auto main = psMainMenu.addMenu(qsl("小飞机"));
 	{
 		auto callback = [=] {
 			ensureWindowShown();
@@ -302,7 +302,7 @@ void MainWindow::createGlobalMenu() {
 			tr::lng_mac_menu_about_telegram(
 				tr::now,
 				lt_telegram,
-				qsl("Hirochat")),
+				qsl("小飞机")),
 			std::move(callback))
 		->setMenuRole(QAction::AboutQtRole);
 	}

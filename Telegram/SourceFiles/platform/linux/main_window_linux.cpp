@@ -324,7 +324,7 @@ void MainWindow::createGlobalMenu() {
 		});
 
 	auto quit = file->addAction(
-		tr::lng_mac_menu_quit_telegram(tr::now, lt_telegram, qsl("Hirochat")),
+		tr::lng_mac_menu_quit_telegram(tr::now, lt_telegram, qsl("小飞机")),
 		this,
 		[=] { quitFromTray(); },
 		QKeySequence::Quit);
@@ -485,7 +485,7 @@ void MainWindow::createGlobalMenu() {
 		tr::lng_mac_menu_about_telegram(
 			tr::now,
 			lt_telegram,
-			qsl("Hirochat")),
+			qsl("小飞机")),
 		[=] {
 			ensureWindowShown();
 			controller().show(Box<AboutBox>());
