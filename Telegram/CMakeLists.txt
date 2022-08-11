@@ -4,6 +4,9 @@
 # For license and copyright information please follow this link:
 # https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
 add_executable(Telegram WIN32 MACOSX_BUNDLE)
 init_non_host_target(Telegram)
 
@@ -49,7 +52,7 @@ if (WIN32)
 
     nuget_add_winrt(Telegram)
 endif()
-
+ 
 set_target_properties(Telegram PROPERTIES AUTOMOC ON)
 target_prepare_qrc(Telegram)
 

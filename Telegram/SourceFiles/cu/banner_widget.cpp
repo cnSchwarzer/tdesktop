@@ -79,6 +79,8 @@ void Cu::BannerWidget::start() {
     _timer.setSingleShot(false);
     _timer.setInterval(5000);
     _timer.callOnTimeout([=]() {
+        if (_items.empty())
+            return;
         _index++;
         _index = _index % _items.size();
     });
